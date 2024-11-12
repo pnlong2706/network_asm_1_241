@@ -2,28 +2,50 @@ import socket
 import shlex
 import threading
 import json
+import hashlib
+import os
+import random
+import string
+
 import os
 import pickle
 import struct
 
-def connect_to_tracker_server(host, port):
+def connect_to_tracker_server(host, port, client_id):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host, port))
-        
+    
         ### Send infomation to server
-        
+        with open('metafile_status.json', 'r') as file:
+            data = json.load(file)
+            
+            request = {
+                "action": "update",
+                "event": "started",
+                "infohash": [],
+                "peerid": client_id,
+                "port": 3000
+            }
+            
+            for info_hash in data:
+                request["infohash"].append({"hash": data[info_hash]["infohash"], "downloaded": 100})
+            
+            s.send(json.dumps(request).encode())
+            s.recv(4096)
+                
         ######################
         
         print(f"Connect to tracker host {host}:{port}")
         return s
     
     except Exception as e:
+        print(e)
         return 0
 
-def close_connection(s):
+def close_connection(s, client_id):
     ## Send close connection
-    
+    s.send(json.dumps({"action": "none", "event": "stop", "peerid": client_id, "port": 3000}).encode())
     #####################
     s.close()
     
@@ -96,9 +118,11 @@ if __name__ == "__main__":
     SERVER_HOST = "127.0.0.1"
     SERVER_PORT = 6888
     
+    client_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+    
     print("Welcome to P2P file sharing, type 'help' for more infomation!")
     
-    s = connect_to_tracker_server(SERVER_HOST, SERVER_PORT)
+    s = connect_to_tracker_server(SERVER_HOST, SERVER_PORT, client_id)
     if(s): print(f"You are connected to tracker server {SERVER_HOST}: {SERVER_PORT}\nType 'connect [hostname] [port]' to connect to other tracker server!")
     else: print("Your are not connected to tracker server!\nType 'connect [hostname] [port]' to connect to other tracker server!")
     
@@ -114,25 +138,91 @@ if __name__ == "__main__":
                 close_connection(s)
             
             if(len(cmd)!=3):
-                s = connect_to_tracker_server(SERVER_HOST, SERVER_PORT)
+                s = connect_to_tracker_server(SERVER_HOST, SERVER_PORT, client_id)
             else:
                 SERVER_HOST = cmd[1]
                 SERVER_PORT = int(cmd[2])
-                s = connect_to_tracker_server(cmd[1], int(cmd[2]))
+                s = connect_to_tracker_server(cmd[1], int(cmd[2]), client_id)
                 
             if(not s):
                 print("Cannot connect to this host!")
 
         elif(cmd[0] == "exit"):
             if(s):
-                close_connection(s)
+                close_connection(s,client_id)
             break
         
         elif(cmd[0] == 'create'):
+
+            torrent_id = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+
             announce = SERVER_HOST
             name = input(">>> Dir: ")
-            file = input(">>> File: ")
-            piece_lenght = input(">>> Piece length: ")
+            files = input(">>> File: ").split()
+            piece_length = int(input(">>> Piece length: "))
+
+            # Khởi tạo cấu trúc metadata
+            metadata = {
+                torrent_id: {
+                    "announce": announce,
+                    "info": {
+                        "files": [],
+                        "name": name,
+                        "piece length": piece_length,
+                        "pieces": ""
+                    },
+                    "description": "information",
+                    "piece_have": "0010110111",  
+                    "left": 128  
+                }
+            }
+
+            pieces_concatenated = ""  
+
+            for file in files:
+                file_path = os.path.join(name, file)
+                print(f"Đang xử lý file: {file_path}")
+
+                file_info = {
+                    "length": os.path.getsize(file_path),
+                    "path": file
+                }
+
+                try:
+                    with open(file_path, "rb") as f:
+                        while True:
+                            piece_data = f.read(piece_length)
+                            if not piece_data:
+                                break
+                            
+                            # Tính hash SHA-1 cho phần dữ liệu và nối vào `pieces_concatenated`
+                            sha1 = hashlib.sha1(piece_data).digest()
+                            pieces_concatenated += sha1.hex()
+                except FileNotFoundError:
+                    print(f"File '{file_path}' không tồn tại.")
+                    continue
+
+                # Thêm thông tin file vào danh sách `files`
+                metadata[torrent_id]["info"]["files"].append(file_info)
+
+            # Gán chuỗi hash SHA-1 vào `pieces` trong metadata
+            metadata[torrent_id]["info"]["pieces"] = pieces_concatenated
+
+            # Tính toán infohash từ phần `info`
+            info_dict = metadata[torrent_id]["info"]
+            info_bytes = json.dumps(info_dict, sort_keys=True).encode('utf-8')  # Chuyển dict info thành bytes
+            infohash = hashlib.sha1(info_bytes).hexdigest()  # Tính SHA-1 hash của info
+
+            # Thêm infohash vào metadata
+            metadata[torrent_id]["infohash"] = infohash
+
+            # Lưu metadata dưới dạng JSON
+            meta_file_name = "metafile_status.json"
+            with open(meta_file_name, "w") as meta_file:
+                json.dump(metadata, meta_file, indent=4)
+
+            print(f"Metadata đã được lưu vào '{meta_file_name}'")
+
             
         elif(cmd[0] == "upload"):
             s.send("upload".encode())
@@ -215,6 +305,11 @@ if __name__ == "__main__":
                 
             print("File download completed")
             s.send("get_peer".encode())
+            
+        elif(cmd[0] == "test"):
+            s.send(json.dumps({"action": "get-peer", "infohash": "anan221r5naan"}).encode())
+            res = s.recv(4096).decode()
+            print(res)
         
         else:
             print("Command is invalid!")

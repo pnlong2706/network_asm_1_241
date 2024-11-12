@@ -1,6 +1,15 @@
 import socket
 import threading
 from client_handler import client_handler
+import argparse
+
+# Initialize parser
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-hs", "--host", default="127.0.0.1", help = "")
+parser.add_argument("-pt", "--port", default=6888, help = "")
+
+args = parser.parse_args()
 
 
 def start_server(host, port):
@@ -27,4 +36,4 @@ def start_server(host, port):
             conn.close()
     
 if __name__ == "__main__":
-    start_server("127.0.0.1", 6888)
+    start_server(args.host, int(args.port))
