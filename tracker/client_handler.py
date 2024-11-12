@@ -7,11 +7,12 @@ from database import (
 
 import json
 import hashlib
+import os
 
 def client_handler(conn, addr):
     try:
         while(True):
-            data = conn.recv(4096).decode()
+            data = conn.recv(16000).decode()
             if not data:
                 break
             
@@ -55,9 +56,10 @@ def client_handler(conn, addr):
                 )
             
             elif cmd['action'] == 'upload':
+
                 
-                sha1_hash = hashlib.sha1(cmd["info"]).hexdigest()
-                
+                sha1_hash = hashlib.sha1(json.dumps(cmd["info"]).encode('utf-8')).hexdigest()
+                                
                 update_metafile(
                     name=cmd['info']['name'],
                     infohash=sha1_hash,
@@ -75,7 +77,7 @@ def client_handler(conn, addr):
                 json_object = json.dumps({"info": cmd["info"], "description": cmd["description"]})
  
                 # Writing to sample.json
-                with open(sha1_hash + ".json", "w") as outfile:
+                with open(os.path.join("metafile", sha1_hash + ".json", "w")) as outfile:
                     outfile.write(json_object)
                 
             elif cmd['event'] == 'stop':

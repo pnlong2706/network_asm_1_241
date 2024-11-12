@@ -28,7 +28,13 @@ def delete_peer(peerid, addr, port):
     conn.commit()
     
 def update_metafile(name, infohash, description):
-    cur.execute(f"INSERT INTO metafile (name, infohash, description) VALUES ('{name}', '{infohash}', '{description}'")
+    cur.execute(f"SELECT * FROM metafile WHERE infohash = '{infohash}'")
+    re = cur.fetchall()
+    
+    if(len(re)>0):
+        return
+    
+    cur.execute(f"INSERT INTO metafile (name, infohash, description) VALUES ('{name}', '{infohash}', '{description}')")
     conn.commit()
     
 if __name__ == "__main__":

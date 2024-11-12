@@ -11,7 +11,7 @@ import os
 import pickle
 import struct
 
-def connect_to_tracker_server(host, port, client_id):
+def connect_to_tracker_server(host, port, client_id, client_port):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host, port))
@@ -25,7 +25,7 @@ def connect_to_tracker_server(host, port, client_id):
                 "event": "started",
                 "infohash": [],
                 "peerid": client_id,
-                "port": 3000
+                "port": client_port
             }
             
             for info_hash in data:
@@ -43,9 +43,9 @@ def connect_to_tracker_server(host, port, client_id):
         print(e)
         return 0
 
-def close_connection(s, client_id):
+def close_connection(s, client_id, client_port):
     ## Send close connection
-    s.send(json.dumps({"action": "none", "event": "stop", "peerid": client_id, "port": 3000}).encode())
+    s.send(json.dumps({"action": "none", "event": "stop", "peerid": client_id, "port": client_port}).encode())
     #####################
     s.close()
     
@@ -117,12 +117,13 @@ def save_piece(piece_data, piece_index, torrent_file):
 if __name__ == "__main__":
     SERVER_HOST = "127.0.0.1"
     SERVER_PORT = 6888
+    LISTEN_PORT = 3000
     
     client_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
     
     print("Welcome to P2P file sharing, type 'help' for more infomation!")
     
-    s = connect_to_tracker_server(SERVER_HOST, SERVER_PORT, client_id)
+    s = connect_to_tracker_server(SERVER_HOST, SERVER_PORT, client_id, LISTEN_PORT)
     if(s): print(f"You are connected to tracker server {SERVER_HOST}: {SERVER_PORT}\nType 'connect [hostname] [port]' to connect to other tracker server!")
     else: print("Your are not connected to tracker server!\nType 'connect [hostname] [port]' to connect to other tracker server!")
     
@@ -138,18 +139,18 @@ if __name__ == "__main__":
                 close_connection(s)
             
             if(len(cmd)!=3):
-                s = connect_to_tracker_server(SERVER_HOST, SERVER_PORT, client_id)
+                s = connect_to_tracker_server(SERVER_HOST, SERVER_PORT, client_id, LISTEN_PORT)
             else:
                 SERVER_HOST = cmd[1]
                 SERVER_PORT = int(cmd[2])
-                s = connect_to_tracker_server(cmd[1], int(cmd[2]), client_id)
+                s = connect_to_tracker_server(cmd[1], int(cmd[2]), client_id, LISTEN_PORT)
                 
             if(not s):
                 print("Cannot connect to this host!")
 
         elif(cmd[0] == "exit"):
             if(s):
-                close_connection(s,client_id)
+                close_connection(s,client_id, LISTEN_PORT)
             break
         
         elif(cmd[0] == 'create'):
