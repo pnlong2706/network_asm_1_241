@@ -25,7 +25,6 @@ def connect_to_tracker_server(host, port, client_id):
                 "port": 3000
             }
             
-            
             for info_hash in data:
                 request["infohash"].append({"hash": data[info_hash]["infohash"], "downloaded": 100})
             
