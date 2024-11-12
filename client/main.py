@@ -211,22 +211,61 @@ if __name__ == "__main__":
 
             # Tính toán infohash từ phần `info`
             info_dict = metadata[torrent_id]["info"]
-            info_bytes = json.dumps(info_dict, sort_keys=True).encode('utf-8')  # Chuyển dict info thành bytes
+            info_bytes = json.dumps(info_dict).encode('utf-8')  # Chuyển dict info thành bytes
             infohash = hashlib.sha1(info_bytes).hexdigest()  # Tính SHA-1 hash của info
 
             # Thêm infohash vào metadata
             metadata[torrent_id]["infohash"] = infohash
 
-            # Lưu metadata dưới dạng JSON
+            # Kiểm tra xem metafile đã tồn tại chưa và đọc nó nếu có
             meta_file_name = "metafile_status.json"
+            if os.path.exists(meta_file_name):
+                with open(meta_file_name, "r") as meta_file:
+                    current_metadata = json.load(meta_file)
+            else:
+                current_metadata = {}
+
+            # Append thêm metadata mới vào dữ liệu hiện tại
+            current_metadata.update(metadata)
+
+            # Lưu lại toàn bộ metadata vào file
             with open(meta_file_name, "w") as meta_file:
-                json.dump(metadata, meta_file, indent=4)
+                json.dump(current_metadata, meta_file, indent=4)
 
             print(f"Metadata đã được lưu vào '{meta_file_name}'")
 
             
         elif(cmd[0] == "upload"):
-            s.send("upload".encode())
+            #s.send("upload".encode())
+            received_hash = cmd[1]
+            with open('metafile_status.json', 'r') as file:
+                data = json.load(file)
+
+            # Tạo một request để gửi đi
+            request = {
+                "action": "upload",
+                "event": "started",
+                "peerid": client_id,
+                "downloaded": 100,
+                "port": 3000
+            }
+
+            # Duyệt qua từng torrent trong metadata
+            for info_hash, torrent_info in data.items():
+                # Kiểm tra nếu infohash trong metafile khớp với hash đã nhận
+                # print(info_hash)
+                # print(torrent_info["infohash"])
+                # print(received_hash)
+                if torrent_info["infohash"] == received_hash:
+                    # Nếu khớp, thêm thông tin của torrent vào request
+                    request["info"]= torrent_info["info"]
+                    request["description"] = torrent_info["description"]
+
+                    #print(request)
+                
+
+            # Gửi request dưới dạng JSON
+            s.send(json.dumps(request).encode())
             
         elif(cmd[0] == "search"):
             s.send("search".encode())
