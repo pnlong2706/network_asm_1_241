@@ -1,0 +1,20 @@
+{
+    "712894719824jkkjasnc": 
+    {
+        "announce": "127.0.0.1",
+        "info":
+        {
+            "files":
+            [
+                {"length": 111, "path": ["111.txt"]},
+                {"length": 222, "path": ["222.txt"]}
+            ],
+            "name": "file",
+            "piece length": 1024,
+            "pieces": "bnakjcsnkjasc"
+        },
+        "decription": "infomation",
+        "piece_have": "0010110111",
+        "left": 128
+    }
+}
