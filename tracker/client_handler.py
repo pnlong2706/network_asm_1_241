@@ -79,7 +79,6 @@ def client_handler(conn, addr):
                     outfile.write(json_object)
                 
             elif cmd['event'] == 'stop':
-                print(cmd)
                 delete_peer(
                     peerid= cmd['peerid'],
                     addr= addr[0],

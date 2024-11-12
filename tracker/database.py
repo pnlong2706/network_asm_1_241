@@ -9,6 +9,12 @@ conn = psycopg2.connect(database = "neondb",
 cur = conn.cursor()
 
 def update_peerfile(infohash, peerid, addr, port, downloaded):
+    cur.execute(f"SELECT * FROM metafile WHERE infohash = '{infohash}'")
+    re = cur.fetchall()
+    
+    if(len(re)==0):
+        return
+    
     cur.execute(f"INSERT INTO peerfile (infohash, peerid, peeraddr, peerport, downloaded) VALUES ('{infohash}', '{peerid}', '{addr}', {port}, {downloaded})")
     conn.commit()
 
