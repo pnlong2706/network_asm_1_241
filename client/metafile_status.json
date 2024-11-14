@@ -34,5 +34,23 @@
         "piece_have": "0010110111",
         "left": 128,
         "infohash": "30c0b15e0dc0f1b712bb1456958af338d23f139b"
+    },
+    "ru4lG1fxA51x": {
+        "announce": "127.0.0.1",
+        "info": {
+            "files": [
+                {
+                    "length": 4,
+                    "path": "text1.txt"
+                }
+            ],
+            "name": "file",
+            "piece length": 2,
+            "pieces": "da23614e02469a0d7c7bd1bdab5c9c474b1904dc034778198a045c1ed80be271cdd029b76874f6fc"
+        },
+        "description": "information",
+        "piece_have": "0010110111",
+        "left": 128,
+        "infohash": "c006eaa78f9f036ce389d992ec43cab269f5a5d3"
     }
 }

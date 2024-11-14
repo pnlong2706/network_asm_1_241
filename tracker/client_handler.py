@@ -56,7 +56,6 @@ def client_handler(conn, addr):
                 )
             
             elif cmd['action'] == 'upload':
-
                 
                 sha1_hash = hashlib.sha1(json.dumps(cmd["info"]).encode('utf-8')).hexdigest()
                                 
