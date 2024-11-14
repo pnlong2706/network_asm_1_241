@@ -6,6 +6,7 @@ import hashlib
 import os
 import random
 import string
+import math
 
 import os
 import pickle
@@ -55,7 +56,7 @@ def create_meta_file(announce, name, files, piece_length, description):
             "info": {
                 "files": [],
                 "name": name,
-                "piece length": piece_length,
+                "piece_length": piece_length,
                 "pieces": ""
             },
             "description": description,
@@ -66,16 +67,20 @@ def create_meta_file(announce, name, files, piece_length, description):
 
     pieces_concatenated = ""  
     total_length = 0
+    num_piece = 0
     
     for file in files:
         file_path = os.path.join("file", file)
         print(f"Đang xử lý file: {file_path}")
 
-        total_length += os.path.getsize(file_path)
+        sz = os.path.getsize(file_path)
+        total_length += sz
         file_info = {
-            "length": os.path.getsize(file_path),
+            "length": sz,
             "path": file
         }
+        
+        num_piece += math.ceil(sz / piece_length)
 
         try:
             with open(file_path, "rb") as f:
@@ -96,7 +101,7 @@ def create_meta_file(announce, name, files, piece_length, description):
 
     # Gán chuỗi hash SHA-1 vào `pieces` trong metadata
     metadata[torrent_id]["info"]["pieces"] = pieces_concatenated
-    metadata[torrent_id]["piece_have"] = "1" * ( total_length // piece_length )
+    metadata[torrent_id]["piece_have"] = "1" * num_piece
 
     # Tính toán infohash từ phần `info`
     info_dict = metadata[torrent_id]["info"]
@@ -153,10 +158,11 @@ def check_metafile(infohash):
     
     return (infohash in data)
 
-def get_peers(tracker_socket, infohash):
+def get_peers(tracker_socket, infohash, client_id):
     request = {
-        "action": "get-peer",
-        "infohash": infohash,
+        "action":   "get-peer",
+        "id":       client_id,
+        "infohash": infohash
     }
     
     tracker_socket.send(json.dumps(request).encode())
@@ -164,6 +170,23 @@ def get_peers(tracker_socket, infohash):
     
     if(response["status"] == "success"):
         return response["result"]
+    
+def download(tracker_socket, client_id, listen_port, infohash, peers):
+    print("x")
+    
+    request = {
+        "action": "download",
+        "event": "started",
+        "infohash": infohash,
+        "peerid": client_id,
+        "port": listen_port,
+        "downloaded": 100
+    }
+    
+    tracker_socket.send(json.dumps(request).encode())
+    response = json.loads(tracker_socket.recv(4096).decode())
+    
+    
     
 if __name__ == "__main__":
     print("Client::test")

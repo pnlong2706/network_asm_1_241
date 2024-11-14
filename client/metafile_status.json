@@ -1,28 +1,10 @@
 {
-    "526a4cd161fdad32b6149e5cc368c0b0ac31c245": {
+    "74594000a100ea581269924574de17a57e911fc4": {
         "announce": "127.0.0.1",
         "info": {
             "files": [
                 {
-                    "length": 4,
-                    "path": "text1.txt"
-                }
-            ],
-            "name": "long",
-            "piece length": 2,
-            "pieces": "da23614e02469a0d7c7bd1bdab5c9c474b1904dc034778198a045c1ed80be271cdd029b76874f6fc"
-        },
-        "description": "2",
-        "piece_have": "11",
-        "left": 128,
-        "infohash": "526a4cd161fdad32b6149e5cc368c0b0ac31c245"
-    },
-    "b9c671194183d8a464df7a0a57394736084e1ffb": {
-        "announce": "127.0.0.1",
-        "info": {
-            "files": [
-                {
-                    "length": 4,
+                    "length": 6,
                     "path": "text1.txt"
                 },
                 {
@@ -30,13 +12,35 @@
                     "path": "text2.txt"
                 }
             ],
-            "name": "File Lota",
-            "piece length": 2,
-            "pieces": "da23614e02469a0d7c7bd1bdab5c9c474b1904dc034778198a045c1ed80be271cdd029b76874f6fc30f088ea6673877c2e2c1edbe7513ff90eda9a6f110c8a30c16070bf2813480d9492a1a170a7d80a3844e4abcc6962fd091f1657e595a2fd1489be47d29f180f1bb04bcfeb93e4243d542d56e1b504cc58e412cbe2ec7e4e08150df17744131fb4aabe843c363836cf4e16666669a25da280a1865c2d2874"
+            "name": "textFile",
+            "piece_length": 4,
+            "pieces": "afcd5173c26fc64a41fc1242bde1f4cd64a54ec67d65c4e24b8e3736acf9a6614b49d59749defef2a5cec7af5f7aab769cf0d4aa440e01c7bfc371b21085cd1a2f46b0902dac61890f31072561978debc466b3a33e6f6dc170438d34fcddf7860d3658fb"
         },
-        "description": "hello world",
-        "piece_have": "1111111",
+        "description": "random",
+        "piece_have": "11111",
         "left": 128,
-        "infohash": "b9c671194183d8a464df7a0a57394736084e1ffb"
+        "infohash": "74594000a100ea581269924574de17a57e911fc4"
+    },
+    "89ce0364ac65b735ead154ed412608c6e2a49c96": {
+        "announce": "127.0.0.1",
+        "info": {
+            "files": [
+                {
+                    "length": 96318,
+                    "path": "img1.png"
+                },
+                {
+                    "length": 96318,
+                    "path": "img2.png"
+                }
+            ],
+            "name": "img",
+            "piece_length": 16384,
+            "pieces": "df53e80e2056b9e82cb425032593705104879cf258b1339596fcafc40a2ebacd09d4cf51c56f3c67ceefedc45efaee63d6c04364c89a926484dec2a7ec4dc2743f6e84144997a5ce9e3e26e6288d4639a6d01ddd1a2a7a0c75cfc444196989f63e13d320fdc1f65018a2029b6ea0d5d210f31b1cd143ed99df53e80e2056b9e82cb425032593705104879cf258b1339596fcafc40a2ebacd09d4cf51c56f3c67ceefedc45efaee63d6c04364c89a926484dec2a7ec4dc2743f6e84144997a5ce9e3e26e6288d4639a6d01ddd1a2a7a0c75cfc444196989f63e13d320fdc1f65018a2029b6ea0d5d210f31b1cd143ed99"
+        },
+        "description": "just img",
+        "piece_have": "111111111111",
+        "left": 128,
+        "infohash": "89ce0364ac65b735ead154ed412608c6e2a49c96"
     }
 }

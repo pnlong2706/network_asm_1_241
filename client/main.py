@@ -1,9 +1,9 @@
 import shlex
-import threading
 import random
 import string
 import argparse
-import sys
+import multiprocessing
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-sh", "--server_host", default="127.0.0.1", help = "")
@@ -20,12 +20,25 @@ from client import (
     get_peers
 )
 
+from request_handler import (
+    start_handling_request
+)
+
+from download import (
+    download_from_peers
+)
+
 if __name__ == "__main__":
-    
     SERVER_HOST = args.server_host
     SERVER_PORT = args.server_port
     LISTEN_PORT = args.listen_port
     CLIENT_ID = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+    
+    # thread = threading.Thread(target=start_handling_request, args=("127.0.0.1", int(LISTEN_PORT)))
+    # thread.start()
+    
+    proc = multiprocessing.Process(target=start_handling_request, args=("127.0.0.1", int(LISTEN_PORT)))
+    proc.start()
     
     print("Welcome to P2P file sharing, type 'help' for more infomation!")
     socket = connect_to_tracker_server(SERVER_HOST, SERVER_PORT, CLIENT_ID, LISTEN_PORT)
@@ -57,6 +70,7 @@ if __name__ == "__main__":
 
         elif cmd[0] == "exit" :
             if(socket): close_connection(socket, CLIENT_ID, LISTEN_PORT)
+            proc.terminate() 
             break
         
         elif cmd[0] == 'create' :
@@ -98,10 +112,17 @@ if __name__ == "__main__":
             
             peers = get_peers(
                 tracker_socket= socket,
-                infohash=       cmd[1]
+                infohash=       cmd[1],
+                client_id=      CLIENT_ID
             )
             
             print(peers)
+            ## MUST DOWNLOAD FROM CLIENT.PY
+            download_from_peers(
+                info_hash=  cmd[1],
+                client_id=  CLIENT_ID,
+                peers=      peers
+            )
         
         else:
             print("Invalid command, type 'help' for more!")

@@ -36,6 +36,7 @@ def client_handler(conn, addr):
                 peer_list = []
                 
                 for peer in result:
+                    if(peer[0] == cmd["id"]): continue
                     peer_list.append({
                         "peerid": peer[0],
                         "addr": peer[1],
@@ -52,6 +53,8 @@ def client_handler(conn, addr):
                     port=cmd['port'],
                     downloaded=cmd['downloaded']
                 )
+                
+                conn.sendall(json.dumps({"status": "success"}).encode())
             
             elif cmd['action'] == 'upload':
                 sha1_hash = hashlib.sha1(json.dumps(cmd["info"]).encode('utf-8')).hexdigest()
