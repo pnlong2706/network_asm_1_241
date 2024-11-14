@@ -12,7 +12,7 @@ import os
 def client_handler(conn, addr):
     try:
         while(True):
-            data = conn.recv(16000).decode()
+            data = conn.recv(16384).decode()
             if not data:
                 break
             
@@ -41,12 +41,10 @@ def client_handler(conn, addr):
                         "addr": peer[1],
                         "port": peer[2]
                     })
-                    
-                print(peer_list)
                 
-                conn.sendall(json.dumps({"result": peer_list}).encode())
+                conn.sendall(json.dumps({"status": "success", "result": peer_list}).encode())
             
-            elif cmd['action'] == 'download' and cmd['event'] == 'start':
+            elif cmd['action'] == 'download' and cmd['event'] == 'started':
                 update_peerfile(
                     infohash=cmd['infohash'],
                     peerid=cmd['peerid'],
@@ -56,7 +54,6 @@ def client_handler(conn, addr):
                 )
             
             elif cmd['action'] == 'upload':
-                
                 sha1_hash = hashlib.sha1(json.dumps(cmd["info"]).encode('utf-8')).hexdigest()
                                 
                 update_metafile(
@@ -74,10 +71,11 @@ def client_handler(conn, addr):
                 )
                 
                 json_object = json.dumps({"info": cmd["info"], "description": cmd["description"]})
- 
-                # Writing to sample.json
-                with open(os.path.join("metafile", sha1_hash + ".json", "w")) as outfile:
+
+                with open(os.path.join("metafile", sha1_hash + ".json"), "w") as outfile:
                     outfile.write(json_object)
+                    
+                conn.sendall(json.dumps({"status": "success"}).encode())
                 
             elif cmd['event'] == 'stop':
                 delete_peer(

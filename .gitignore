@@ -1,1 +1,6 @@
 client2
+tracker/metafile
+test
+client/__pycache__
+tracker/__pycache__
+tracker/metafile
