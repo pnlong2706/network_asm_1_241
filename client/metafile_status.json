@@ -1,5 +1,5 @@
 {
-    "74594000a100ea581269924574de17a57e911fc4": {
+    "c5fefbf5e82a67ccce418092d4d5d3cd767c58da": {
         "announce": "127.0.0.1",
         "info": {
             "files": [
@@ -12,16 +12,16 @@
                     "path": "text2.txt"
                 }
             ],
-            "name": "textFile",
+            "name": "Text File",
             "piece_length": 4,
             "pieces": "afcd5173c26fc64a41fc1242bde1f4cd64a54ec67d65c4e24b8e3736acf9a6614b49d59749defef2a5cec7af5f7aab769cf0d4aa440e01c7bfc371b21085cd1a2f46b0902dac61890f31072561978debc466b3a33e6f6dc170438d34fcddf7860d3658fb"
         },
-        "description": "random",
-        "piece_have": "11111",
-        "left": 128,
-        "infohash": "74594000a100ea581269924574de17a57e911fc4"
+        "description": "Just some shit",
+        "piece_have": "00000",
+        "downloaded": 20,
+        "infohash": "c5fefbf5e82a67ccce418092d4d5d3cd767c58da"
     },
-    "89ce0364ac65b735ead154ed412608c6e2a49c96": {
+    "a1dd25ad0bc022221b5b7fbaa8d404a39c4cb318": {
         "announce": "127.0.0.1",
         "info": {
             "files": [
@@ -34,13 +34,13 @@
                     "path": "img2.png"
                 }
             ],
-            "name": "img",
-            "piece_length": 16384,
-            "pieces": "df53e80e2056b9e82cb425032593705104879cf258b1339596fcafc40a2ebacd09d4cf51c56f3c67ceefedc45efaee63d6c04364c89a926484dec2a7ec4dc2743f6e84144997a5ce9e3e26e6288d4639a6d01ddd1a2a7a0c75cfc444196989f63e13d320fdc1f65018a2029b6ea0d5d210f31b1cd143ed99df53e80e2056b9e82cb425032593705104879cf258b1339596fcafc40a2ebacd09d4cf51c56f3c67ceefedc45efaee63d6c04364c89a926484dec2a7ec4dc2743f6e84144997a5ce9e3e26e6288d4639a6d01ddd1a2a7a0c75cfc444196989f63e13d320fdc1f65018a2029b6ea0d5d210f31b1cd143ed99"
+            "name": "Image file",
+            "piece_length": 8192,
+            "pieces": "2dfe4d4a3f69a38b780073a256f6773a17bd2f7cc4eaab8e144c7f6bd03ceab488e51ebacda45fc70a1efeb7f1aecac3aaf679a6532a209a9fc4af64d440efa22e9c71487b1c650862b091100f90878b7d0f2aafcd463ff7df6c22ab440eebbdd8a908859029da8c0ec7ab2e40bd73d3800ebf599c0b7aec7389d1b0056ee04b24fb5fc4faf010f114d717bd1fd65a0c1007c185f4bd038550f63c45a075e9d103dce5f0021b9241c7c9a0d61fe5391ed8e72aa04a2b75641802a291b33419a790f32591efcc02eccbac2a2bb12884ef53a05eb02bdbaf517ac4220377be4d2d4af70bff44e6264a59d60b0cc770ea612dfe4d4a3f69a38b780073a256f6773a17bd2f7cc4eaab8e144c7f6bd03ceab488e51ebacda45fc70a1efeb7f1aecac3aaf679a6532a209a9fc4af64d440efa22e9c71487b1c650862b091100f90878b7d0f2aafcd463ff7df6c22ab440eebbdd8a908859029da8c0ec7ab2e40bd73d3800ebf599c0b7aec7389d1b0056ee04b24fb5fc4faf010f114d717bd1fd65a0c1007c185f4bd038550f63c45a075e9d103dce5f0021b9241c7c9a0d61fe5391ed8e72aa04a2b75641802a291b33419a790f32591efcc02eccbac2a2bb12884ef53a05eb02bdbaf517ac4220377be4d2d4af70bff44e6264a59d60b0cc770ea61"
         },
-        "description": "just img",
-        "piece_have": "111111111111",
-        "left": 128,
-        "infohash": "89ce0364ac65b735ead154ed412608c6e2a49c96"
+        "description": "test",
+        "piece_have": "111111111111111111111111",
+        "downloaded": 196608,
+        "infohash": "a1dd25ad0bc022221b5b7fbaa8d404a39c4cb318"
     }
 }

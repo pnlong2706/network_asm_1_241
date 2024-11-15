@@ -2,12 +2,12 @@ import shlex
 import random
 import string
 import argparse
+import threading
 import multiprocessing
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-sh", "--server_host", default="127.0.0.1", help = "")
-parser.add_argument("-sp", "--server_port", default=6888, help = "")
+parser.add_argument("-sp", "--server_port", default=6889, help = "")
 parser.add_argument("-lp", "--listen_port", default=3000, help = "")
 args = parser.parse_args()
 
@@ -15,17 +15,17 @@ from client import (
     connect_to_tracker_server,
     close_connection,
     create_meta_file,
-    upload,
+    publish,
     check_metafile,
-    get_peers
+    get_peers,
+    download_file,
+    search_torrent,
+    get_torrent,
+    get_my_torrent
 )
 
 from request_handler import (
     start_handling_request
-)
-
-from download import (
-    download_from_peers
 )
 
 if __name__ == "__main__":
@@ -51,79 +51,140 @@ if __name__ == "__main__":
         cmd = shlex.split(cmd)
         if len(cmd)==0: continue
         
-        if cmd[0] == 'help':
-            print("Help: ")
-            
-        elif cmd[0] == 'connect' :
-            if socket:close_connection(socket)
-            
-            if len(cmd) == 1:
-                socket = connect_to_tracker_server(SERVER_HOST, SERVER_PORT, CLIENT_ID, LISTEN_PORT)
-            elif len(cmd) == 3:
-                SERVER_HOST = cmd[1]
-                SERVER_PORT = int(cmd[2])
-                socket = connect_to_tracker_server(cmd[1], int(cmd[2]), CLIENT_ID, LISTEN_PORT)
-            else: print("Invalid command, type 'help' for more!")
+        try:
+            if cmd[0] == 'help':
+                print("Help: ")
                 
-            if(not socket): print("Cannot connect to this host!")
-            else: print("Connect successfully!")
+            elif cmd[0] == 'connect' :
+                if socket: close_connection(socket, SERVER_HOST, CLIENT_ID, LISTEN_PORT)
+                
+                if len(cmd) == 1:
+                    socket = connect_to_tracker_server(SERVER_HOST, SERVER_PORT, CLIENT_ID, LISTEN_PORT)
+                elif len(cmd) == 3:
+                    SERVER_HOST = cmd[1]
+                    SERVER_PORT = int(cmd[2])
+                    socket = connect_to_tracker_server(cmd[1], int(cmd[2]), CLIENT_ID, LISTEN_PORT)
+                else: print("Invalid command, type 'help' for more!")
+                    
+                if(not socket): print("Cannot connect to this host!")
+                else: print("Connect successfully!")
 
-        elif cmd[0] == "exit" :
-            if(socket): close_connection(socket, CLIENT_ID, LISTEN_PORT)
+            elif cmd[0] == "exit" :
+                if(socket): close_connection(socket, SERVER_HOST, CLIENT_ID, LISTEN_PORT)
+                proc.terminate() 
+                break
+            
+            elif cmd[0] == 'create' :
+                announce = "none"
+                name = input(">>> Name: ")
+                files = input(">>> Files: ").split()
+                description = input(">>> Description: ")
+                piece_length = int(input(">>> Piece length: "))
+                
+                infohash = create_meta_file(
+                    announce=       announce,
+                    name=           name,
+                    files=          files,
+                    piece_length=   piece_length,
+                    description=    description
+                )
+                
+                print(f"Metafile created successfully!\nInfoHash: {infohash}")
+                
+            elif cmd[0] == "publish" :
+                if len(cmd) == 1:
+                    announce = SERVER_HOST
+                    name = input(">>> Name: ")
+                    files = input(">>> Files: ").split()
+                    description = input(">>> Description: ")
+                    piece_length = int(input(">>> Piece length: "))
+                    
+                    infohash = create_meta_file(
+                        announce=       announce,
+                        name=           name,
+                        files=          files,
+                        piece_length=   piece_length,
+                        description=    description
+                    )
+                    
+                    publish(
+                        tracker_socket= socket, 
+                        tracker_addr=   SERVER_HOST,
+                        received_hash=  infohash, 
+                        client_id=      CLIENT_ID,
+                        listen_port=    LISTEN_PORT
+                    )
+                    
+                    print("Publish file successfully")
+                
+                elif len(cmd) == 2:
+                    infohash = cmd[1]
+                    if not check_metafile(infohash): print("Metafile is not exist!")
+                    
+                    publish(
+                        tracker_socket= socket, 
+                        tracker_addr=   SERVER_HOST,
+                        received_hash=  infohash, 
+                        client_id=      CLIENT_ID,
+                        listen_port=    LISTEN_PORT
+                    )
+                    
+                    print("Publish file successfully")
+                
+                else: print("Invalid command, type 'help' for more!")
+                
+            elif cmd[0] == "search" :
+                if len(cmd) >= 2: 
+                    keyword = cmd[1]
+                else:
+                    keyword = input(">>> keyword: ")
+                    
+                if not socket:
+                    print("You are not connect to tracker server!")
+                    continue
+                    
+                res = search_torrent(
+                    tracker_socket= socket, 
+                    keyword=        keyword
+                )
+                
+                for i in range(len(res)):
+                    if i >= 10: break
+                    print(f"{i+1}. {res[i][1]}. Description: {res[i][2]}")
+                
+            elif cmd[0] == "get_torrent" :
+                if len(cmd) != 2:
+                    print("Invalid command, type 'help' for more!")
+                    
+                get_torrent(
+                    tracker_socket= socket,
+                    infohash=       cmd[1]
+                )
+                
+            elif cmd[0] == "my_torrent":
+                res = get_my_torrent()
+                for i in range(len(res)):
+                    print(f"{i+1}. {res[i][0]}. Downloaded: {res[i][2]:8}. Description: {res[i][1]}")
+                
+            elif cmd[0] == "download" :
+                if len(cmd)!=2: print("Invalid command, type 'help' for more!")
+                if not check_metafile(cmd[1]): print("Metafile is not exist!")
+                
+                peers = get_peers(
+                    tracker_socket= socket,
+                    infohash=       cmd[1],
+                    client_id=      CLIENT_ID
+                )
+                
+                print(f"Downloading from {peers} ... We'll notice you when the download is complete!")
+
+                download_thread = threading.Thread(target=download_file, args=(socket, CLIENT_ID, LISTEN_PORT, cmd[1], peers))
+                download_thread.start()
+            
+            else:
+                print("Invalid command, type 'help' for more!")
+        
+        except Exception as e:
             proc.terminate() 
-            break
-        
-        elif cmd[0] == 'create' :
-            announce = "none"
-            name = input(">>> Name: ")
-            files = input(">>> Files: ").split()
-            description = input(">>> Description: ")
-            piece_length = int(input(">>> Piece length: "))
-            
-            infohash = create_meta_file(
-                announce=       announce,
-                name=           name,
-                files=          files,
-                piece_length=   piece_length,
-                description=    description
-            )
-            
-            print(f"Metafile created successfully!\nInfoHash: {infohash}")
-            
-        elif cmd[0] == "upload" :
-            infohash = cmd[1]
-            
-            upload(
-                tracker_socket= socket, 
-                tracker_addr=   SERVER_HOST,
-                received_hash=  infohash, 
-                client_id=      CLIENT_ID
-            )
-            
-        elif cmd[0] == "search" :
-            socket.send("search".encode())
-            
-        elif cmd[0] == "get_torrent" :
-            socket.send("get_torrent".encode())
-            
-        elif cmd[0] == "download" :
-            if len(cmd)!=2: print("Invalid command, type 'help' for more!")
-            if not check_metafile(cmd[1]): print("Metafile is not exist!")
-            
-            peers = get_peers(
-                tracker_socket= socket,
-                infohash=       cmd[1],
-                client_id=      CLIENT_ID
-            )
-            
-            print(peers)
-            ## MUST DOWNLOAD FROM CLIENT.PY
-            download_from_peers(
-                info_hash=  cmd[1],
-                client_id=  CLIENT_ID,
-                peers=      peers
-            )
-        
-        else:
-            print("Invalid command, type 'help' for more!")
+            print(e)
             

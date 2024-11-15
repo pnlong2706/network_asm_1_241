@@ -1,0 +1,27 @@
+2024-11-15 21:57:06.288898: Start downloading, meatafile: a1dd25ad0bc022221b5b7fbaa8d404a39c4cb318
+2024-11-15 21:57:06.293894: Establish connection to peer 0QZXX4L0JH-127.0.0.1:3000
+2024-11-15 21:57:06.293894: Establish connection to peer VP1I2SZSF0-127.0.0.1:3005
+2024-11-15 21:57:06.308036: Successfully download piece 5 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.309034: Successfully download piece 2 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.309034: Successfully download piece 0 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.315191: Successfully download piece 1 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.319791: Successfully download piece 6 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.324815: Successfully download piece 7 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.329274: Successfully download piece 9 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.333619: Successfully download piece 3 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.337627: Successfully download piece 8 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.341628: Successfully download piece 13 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.342624: Successfully download piece 11 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.348624: Successfully download piece 10 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.349629: Successfully download piece 12 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.349629: Successfully download piece 17 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.354875: Successfully download piece 4 belong to img1.png from 127.0.0.1:3000
+2024-11-15 21:57:06.354875: Successfully download piece 14 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.354875: Successfully download piece 15 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.354875: Successfully download piece 16 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.355878: Successfully download piece 18 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.366005: Successfully download piece 19 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.369796: Successfully download piece 20 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.369796: Successfully download piece 22 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.373911: Successfully download piece 21 belong to img2.png from 127.0.0.1:3000
+2024-11-15 21:57:06.377921: Successfully download piece 23 belong to img2.png from 127.0.0.1:3000

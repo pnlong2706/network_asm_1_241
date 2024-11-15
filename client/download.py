@@ -1,12 +1,20 @@
 import pickle
 import os
 import json
-import struct
+import threading
 import socket
 import random
 import hashlib
 import math
+import datetime
 from concurrent.futures import ThreadPoolExecutor
+
+
+def create_log_file():
+    s = str(datetime.datetime.now())
+    log_file = os.path.join("download_log" ,"log_" + s.replace(" ", "-").replace(":", "-") + ".txt" )
+    file = open(log_file, "a")
+    return file
 
 def create_handshake(info_hash, peer_id):
     """Tạo gói tin handshake theo giao thức BitTorrent"""
@@ -22,6 +30,17 @@ def create_handshake(info_hash, peer_id):
         peer_id.encode()
     )
     return handshake    
+
+def update_meta_info(piece_have, data, metafile, info_hash):
+    num_piece_have = 0
+    for ch in piece_have: 
+        if(ch=='1'): num_piece_have += 1
+    
+    data[info_hash]["piece_have"] = "".join(piece_have)
+    data[info_hash]["downloaded"] = num_piece_have * metafile["info"]["piece_length"]
+    
+    with open("metafile_status.json", "w") as meta_file:
+        json.dump(data, meta_file, indent=4)
 
 def download_from_peers(info_hash, client_id, peers):
     with open('metafile_status.json', 'r') as file:
@@ -40,11 +59,14 @@ def download_from_peers(info_hash, client_id, peers):
                 out.write(b'\0')
                 
         total_length += file["length"]
-        piece_to_peer += ([(file["path"], i, []) for i in range( math.ceil(file["length"] / metafile["info"]["piece_length"]) )])
+        piece_to_peer += ([(file["path"], i, num_piece + i,[]) for i in range( math.ceil(file["length"] / metafile["info"]["piece_length"]) )])
         num_piece += math.ceil(file["length"] / metafile["info"]["piece_length"])
     
     peer_conn = {}
     for peer in peers: peer_conn[peer['peerid']] = (0, 0, 0)
+    
+    log_file = create_log_file()
+    log_file.write(f"{str(datetime.datetime.now())}: Start downloading, meatafile: {info_hash}\n")
     
     def connect_to_peer(peerid, addr, port):
         try:
@@ -60,11 +82,12 @@ def download_from_peers(info_hash, client_id, peers):
                     bitfiled = res[5:(5+len_bit)].decode()
                     peer_conn[peerid] = (bitfiled, addr, port)
                     
+                    log_file.write(f"{str(datetime.datetime.now())}: Establish connection to peer {peerid}-{addr}:{port}\n")
             s.close()
         except Exception as e:
-            print(f"Cannot connect to peer {peerid}")
+            log_file.write(f"{str(datetime.datetime.now())}: Cannot connect to peer {peerid}-{addr}:{port}\n")
         
-                
+    
     with ThreadPoolExecutor(max_workers=5) as executor:
         executor.map(connect_to_peer, [peer["peerid"] for peer in peers], [peer["addr"] for peer in peers], [peer["port"] for peer in peers])
     
@@ -75,13 +98,15 @@ def download_from_peers(info_hash, client_id, peers):
         # piece to (peerid, file)
         for i in range(num_piece):
             if(bit[i] == '1' and piece_have[i] != '1'):
-                piece_to_peer[i][2].append(peer_id)
+                piece_to_peer[i][3].append(peer_id)
     
     for i in range(num_piece):
-        random.shuffle(piece_to_peer[i][2])
+        random.shuffle(piece_to_peer[i][3])
     
-    def request_and_save_piece(piecenum, filename, offset, peers, peer_conn):    
-        if(piece_have[piecenum] == '1'): return True
+    def request_and_save_piece(piecenum, filename, offset, peers):    
+        if(piece_have[piecenum] == '1'): 
+            return True
+        
         for i in range(len(peers)):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((peer_conn[peers[i]][1], peer_conn[peers[i]][2]))
@@ -105,8 +130,11 @@ def download_from_peers(info_hash, client_id, peers):
                 ff.seek(offset * metafile["info"]["piece_length"])
                 ff.write(res)
                 ff.close()
+
+                s.send(int(5).to_bytes(4) + int(4).to_bytes(1) + int(piecenum).to_bytes(4))
                 
-                print(f"Successfully download piece {piecenum} belong to {filename} from peer {peers[i]}")
+                log_file.write(f"{str(datetime.datetime.now())}: Successfully download piece {piecenum} belong to {filename}")
+                log_file.write(f" from {peer_conn[peers[i]][1]}:{peer_conn[peers[i]][2]}\n")
                 
                 piece_have[piecenum] = '1'
                 s.close()
@@ -117,20 +145,32 @@ def download_from_peers(info_hash, client_id, peers):
             
         return False
     
+    ## sort pieces by rarity, i.e. number of peer have this piece
+    piece_to_peer.sort(key = lambda x: len(x[3]))
+    
+    ### random pieces with the same rarity
+    prv = 0
+    for i in range(num_piece):
+        if (i>0 and len(piece_to_peer[i][3]) != len(piece_to_peer[i-1][3])) or i-prv >= 3:
+            temp = piece_to_peer[prv:i]
+            random.shuffle(temp)
+            piece_to_peer[prv:i] = temp
+            prv = i
+    
+    update_thread = []
+    for i in range(4):
+        update_thread.append(threading.Timer(300, update_meta_info, args=(piece_have, data, metafile, info_hash)))
+        update_thread[i].start()
+    
     with ThreadPoolExecutor(max_workers=5) as executor:
-        result = list(executor.map(request_and_save_piece, 
-                        [i for i in range(num_piece)],
-                        [piece_to_peer[i][0] for i in range(num_piece)], 
-                        [piece_to_peer[i][1] for i in range(num_piece)], 
-                        [piece_to_peer[i][2] for i in range(num_piece)],
-                        [peer_conn for i in range(num_piece)]
-                    ))
+        for i in range(num_piece):
+            executor.submit(request_and_save_piece, piece_to_peer[i][2], piece_to_peer[i][0], piece_to_peer[i][1], piece_to_peer[i][3])
     
+    for i in range(4):
+        update_thread[i].cancel()
     
-    data[info_hash]["piece_have"] = "".join(piece_have)
-    
-    with open("metafile_status.json", "w") as meta_file:
-        json.dump(data, meta_file, indent=4)
+    update_meta_info(piece_have, data, metafile, info_hash)
+    log_file.close()
 
         
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ import argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-hs", "--host", default="127.0.0.1", help = "")
-parser.add_argument("-pt", "--port", default=6888, help = "")
+parser.add_argument("-pt", "--port", default=6889, help = "")
 
 args = parser.parse_args()
 
@@ -24,7 +24,7 @@ def start_server(host, port):
             conn, addr = server_socket.accept()
             # host = server_socket.getsockname()
             # log_event(f"Accepted connection from {addr}, hostname is {host}")
-            thread = threading.Thread(target=client_handler, args=(conn, addr))
+            thread = threading.Thread(target=client_handler, args=(conn, addr, host))
             thread.start()
             print(f"Active connections: {threading.active_count() - 1}")
             
