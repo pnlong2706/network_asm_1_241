@@ -36,7 +36,7 @@ def connect_to_tracker_server(host, port, client_id, client_port):
                 for file in data[info_hash]["info"]["files"]:
                     if not os.path.exists(os.path.join("file", file["path"])): valid = False
                                 
-                if valid and data[info_hash]["announce"] == host:
+                if valid:
                     request["infohash"].append({"hash": info_hash, "downloaded": data[info_hash]["downloaded"]})
             
             sock.send(("POST / HTTP/1.1\r\nHost:" + host + "/update\r\n\r\n" + json.dumps(request)).encode())
@@ -80,7 +80,7 @@ def create_meta_file(announce, name, files, piece_length, description):
     
     for file in files:
         file_path = os.path.join("file", file)
-        print(f"Đang xử lý file: {file_path}")
+        print(f"Processing file: {file_path}")
         
         if not os.path.exists(file_path):
             raise Exception("File is not exist in file folder!")
@@ -253,7 +253,7 @@ def get_torrent(tracker_socket, infohash):
     }
     
     tracker_socket.send(("GET / HTTP/1.1\r\nHost:" + tracker_socket.getsockname()[0] + "/getTorrent\r\n\r\n" + json.dumps(request)).encode())
-    response = json.loads(tracker_socket.recv(4*4096).decode())
+    response = json.loads(tracker_socket.recv(1024*1024).decode())
     
     if(response["status"] == "success"):
         meta_file_name = "metafile_status.json"

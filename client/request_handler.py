@@ -15,6 +15,7 @@ def create_log_file():
 def writelog(log_path ,str):
     with open(log_path, "a") as f:
         f.write(str)
+        f.close()
 
 def request_handler(conn, addr, log_file):
     while True:

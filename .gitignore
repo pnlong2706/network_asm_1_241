@@ -4,3 +4,6 @@ test
 client/__pycache__
 tracker/__pycache__
 tracker/metafile
+client/upload_log
+client/download_log
+clinet/file

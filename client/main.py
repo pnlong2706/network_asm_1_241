@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # thread = threading.Thread(target=start_handling_request, args=("127.0.0.1", int(LISTEN_PORT)))
     # thread.start()
     
-    proc = multiprocessing.Process(target=start_handling_request, args=("127.0.0.1", int(LISTEN_PORT)))
+    proc = multiprocessing.Process(target=start_handling_request, args=("192.168.54.250", int(LISTEN_PORT)))
     proc.start()
     
     print("Welcome to P2P file sharing, type 'help' for more infomation!")
