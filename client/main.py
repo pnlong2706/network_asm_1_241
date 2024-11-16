@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-sh", "--server_host", default="127.0.0.1", help = "")
 parser.add_argument("-sp", "--server_port", default=6889, help = "")
 parser.add_argument("-lp", "--listen_port", default=3000, help = "")
+parser.add_argument("-hh", "--host", default="127.0.0.1", help = "")
 args = parser.parse_args()
 
 from client import (
@@ -37,7 +38,7 @@ if __name__ == "__main__":
     # thread = threading.Thread(target=start_handling_request, args=("127.0.0.1", int(LISTEN_PORT)))
     # thread.start()
     
-    proc = multiprocessing.Process(target=start_handling_request, args=("192.168.54.250", int(LISTEN_PORT)))
+    proc = multiprocessing.Process(target=start_handling_request, args=(args.host, int(LISTEN_PORT)))
     proc.start()
     
     print("Welcome to P2P file sharing, type 'help' for more infomation!")
@@ -53,7 +54,18 @@ if __name__ == "__main__":
         
         try:
             if cmd[0] == 'help':
-                print("Help: ")
+                print("All of the commands:")
+                print("1. 'connect [hostname] [port]' : Connect to the tracker server by providing the hostname and port.")
+                print("2. 'exit' : Exit application.")
+                print("3. 'create' : Create a new torrent file, after entering 'create', you'll have to enter the name, files, piece_length, and description of your torrent.",
+                      "You will receive an infohash for this torrent")
+                print("4. 'publish [infohash]' : Publish your torrent file, you'll become the first seeder for this torrent if the tracker doesn't have this torrent.",
+                      "you can enter only 'publish', then you can a create torrent file and upload it at the same time.")
+                print("5. 'search [keyword]' : Search for available torrents that the tracker has.")
+                print("6. 'get_torrent [infohash]' : Get a torrent file from the tracker server by infohash.")
+                print("7. 'my_torrent' : See all of your torrents.")
+                print("8. 'download [infohash]' : Download all files of a torrent, you must have this torrent file in my_torrent first.",
+                      "In case there are not enough seeders, the download may only be partly complete.")
                 
             elif cmd[0] == 'connect' :
                 if socket: close_connection(socket, SERVER_HOST, CLIENT_ID, LISTEN_PORT)
@@ -92,6 +104,10 @@ if __name__ == "__main__":
                 print(f"Metafile created successfully!\nInfoHash: {infohash}")
                 
             elif cmd[0] == "publish" :
+                if not socket:
+                    print("You are not connected to any tracker server!")
+                    continue
+                
                 if len(cmd) == 1:
                     announce = SERVER_HOST
                     name = input(">>> Name: ")
@@ -107,29 +123,35 @@ if __name__ == "__main__":
                         description=    description
                     )
                     
-                    publish(
-                        tracker_socket= socket, 
-                        tracker_addr=   SERVER_HOST,
-                        received_hash=  infohash, 
-                        client_id=      CLIENT_ID,
-                        listen_port=    LISTEN_PORT
-                    )
+                    if not check_metafile(infohash): 
+                        print("Metafile is not exist!")
                     
-                    print("Publish file successfully")
+                    else:
+                        publish(
+                            tracker_socket= socket, 
+                            tracker_addr=   SERVER_HOST,
+                            received_hash=  infohash, 
+                            client_id=      CLIENT_ID,
+                            listen_port=    LISTEN_PORT
+                        )
+                    
+                        print("Publish file successfully")
                 
                 elif len(cmd) == 2:
                     infohash = cmd[1]
-                    if not check_metafile(infohash): print("Metafile is not exist!")
+                    if not check_metafile(infohash): 
+                        print("Metafile is not exist!")
                     
-                    publish(
-                        tracker_socket= socket, 
-                        tracker_addr=   SERVER_HOST,
-                        received_hash=  infohash, 
-                        client_id=      CLIENT_ID,
-                        listen_port=    LISTEN_PORT
-                    )
-                    
-                    print("Publish file successfully")
+                    else:
+                        publish(
+                            tracker_socket= socket, 
+                            tracker_addr=   SERVER_HOST,
+                            received_hash=  infohash, 
+                            client_id=      CLIENT_ID,
+                            listen_port=    LISTEN_PORT
+                        )
+                        
+                        print("Publish file successfully")
                 
                 else: print("Invalid command, type 'help' for more!")
                 
@@ -155,6 +177,11 @@ if __name__ == "__main__":
             elif cmd[0] == "get_torrent" :
                 if len(cmd) != 2:
                     print("Invalid command, type 'help' for more!")
+                    continue
+                    
+                if not socket:
+                    print("You are not connect to tracker server!")
+                    continue
                     
                 get_torrent(
                     tracker_socket= socket,
@@ -168,7 +195,13 @@ if __name__ == "__main__":
                 
             elif cmd[0] == "download" :
                 if len(cmd)!=2: print("Invalid command, type 'help' for more!")
-                if not check_metafile(cmd[1]): print("Metafile is not exist!")
+                if not check_metafile(cmd[1]): 
+                    print("Metafile is not exist!")
+                    continue
+                
+                if not socket:
+                    print("You are not connect to tracker server!")
+                    continue
                 
                 peers = get_peers(
                     tracker_socket= socket,
