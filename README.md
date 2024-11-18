@@ -51,7 +51,7 @@ py main.py
 ```
 3. Clone folder client to client1, go to client1, and run main, similar to 2, but change the listen port by passing it into -lp argument.
 ```
-cd client
+cd client1
 py main.py -lp 3001
 ```
 4. Now you have 2 peers connected to the tracker server through localhost, you can start by entering the command in the command line on the client side. You can type help to see details of each command.
