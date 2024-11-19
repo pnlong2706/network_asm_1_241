@@ -13,7 +13,7 @@ server.
 - Multiple clients could be downloading different files from a target client at a given point in 
 time. This requires the client code to be multithreaded
 
-![Screenshot 2024-11-16 165714](https://github.com/user-attachments/assets/3df37f39-2c2b-4b9d-aa9a-4574070e1268)
+![Screenshot 2024-11-16 165714](https://i.ibb.co/HpZky3b/temp.png)
 
 ## Requirements
 
@@ -90,27 +90,27 @@ There is a simple example for this application:
 
 Initially, the client had cat1.png and cat2.png, the client2 had img1.png, img2.png, text1.txt, text2.txt and glove.6B.50d.txt.
 
-![image](https://github.com/user-attachments/assets/8a78fa1b-2396-4942-89eb-37487d854c1b)
+![image](https://i.ibb.co/nsQbQXd/1.png)
 
 Then, client2 creates a torrent file consisting of img1.png and text1.txt. Client2 publishes it to the tracker server.
 
-![image](https://github.com/user-attachments/assets/1a0858fd-5c7c-4bd3-bca7-538d10e8a081)
+![image](https://i.ibb.co/bzknThn/2.png)
 
 Then, the client searches it by keyword client2 and receives the info hash of that torrent file client2 created. The client gets that torrent and downloads it from client2.
 
-![image](https://github.com/user-attachments/assets/76cd7477-5b28-4c6f-8997-4fc0f31f8fb9)
+![image](https://i.ibb.co/k5BcbQn/3.png)
 
 After downloading successfully, the client now has img1.png and text1.txt in the folder file.
 
-![image](https://github.com/user-attachments/assets/d508e662-cd7a-495d-b437-c366f6dd4ecd)
+![image](https://i.ibb.co/jRqBxTb/4.png)
 
 The download log:
 
-![image](https://github.com/user-attachments/assets/931a11e4-773a-405a-8400-ebc4a09135c0)
+![image](https://i.ibb.co/tpdCFZR/5.png)
 
 The upload log of client2:
 
-![image](https://github.com/user-attachments/assets/8fe2f1e8-ca21-4adc-aa64-b6aac7a5e6b7)
+![image](https://i.ibb.co/PFBnFfF/6.png)
 
 
 ## Bugs and limit
